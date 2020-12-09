@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse, redirect
 from users.models import User
 from django.http import JsonResponse
+from django.views import View
 
 
 def register(request):
@@ -57,3 +58,29 @@ def user_info(request, id):
             'mobile': user.mobile,
         }
     return JsonResponse(res_data)
+
+
+class LoginView(View):
+    """登陆类视图"""
+
+    def get(self, request):
+        username = request.session.get('username')
+        if username:
+            return HttpResponse(f'{username} 用户已登陆')
+        return render(request, 'login.html')
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remember = request.POST.get('remember')
+        try:
+            user = User.objects.get(username=username, password=password)
+        except User.DoesNotExist:
+            return JsonResponse({'message': 'login failed'})
+        else:
+            request.session['user_id'] = user.id
+            request.session['username'] = user.username
+            if remember != 'true':
+                request.session.set_expiry(0)
+            response = JsonResponse({'message': 'login success'})
+            return response
