@@ -7,11 +7,16 @@ def register(request):
     if request.method == 'GET':
         return render(request, 'register.html')
     else:
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        import json
+        req_dict = json.loads(request.body)
+        username = req_dict.get('username')
+        password = req_dict.get('username')
+        # username = request.POST.get('username')
+        # password = request.POST.get('password')
         user = User.objects.create(username=username, password=password)
         print(f'username:{username} password:{password}')
-        return redirect('/login/')
+        # return redirect('/login/')
+        return HttpResponse('注册成功')
 
 
 def login(request):
